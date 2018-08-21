@@ -80,7 +80,6 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 	m := new(dns.Msg)
 	m.SetReply(r)
 
-
 	ipArr, err := net.LookupIP(collector)
 	if err != nil {
 		fmt.Println("Can't resolve :", collector, " : ",err)
@@ -101,11 +100,11 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 
 	w.WriteMsg(m)
 	log.Println("[diag]:", m.Question[0].Name, "-> ", m.Answer)
-	s.throw(&a)
+	go s.throw(&a)
 }
 
 func (s *Server) throw(ldns *net.IP) {
-
+	defer s.mu.Unlock()
 	// Random request id 생성
 	reqId := random.String(32)
 	// request id 에 local cache dns ip 추가
@@ -114,28 +113,28 @@ func (s *Server) throw(ldns *net.IP) {
 	}
 	// request id 전달
 	s.RequestId <- reqId
-	// 2초 후에도 채널에 값이 있는지 확인
-	go func() {
-		time.Sleep(2 * time.Second)
-		select {
-		case id := <-s.RequestId:
-			if id == reqId {
+
+	// 1초 후에도 채널에 값이 있는지 확인
+	time.Sleep(1 * time.Second)
+	s.mu.Lock()
+	select {
+	case id := <-s.RequestId:
+		if id == reqId {
+			delete(s.Client, id)
+			log.Println("[diag]: ", id, "is deleted because not received")
+			return
+		} else {
+			log.Println("[diag]: error! ", id, " and ", reqId, " is not equal")
+			if s.Client[id].Ip == "" {
 				delete(s.Client, id)
-				log.Println("[diag]: ", id, "is deleted because not received")
-				return
-			} else {
-				log.Println("[diag]: error! ", id, " and ", reqId, " is not equal")
-				if s.Client[id].Ip == "" {
-					delete(s.Client, id)
-					log.Println("[diag]: ", id, "is deleted because not exist")
-				}
-				if s.Client[reqId].Ip == "" {
-					delete(s.Client, reqId)
-					log.Println("[diag]: ", reqId, "is deleted because not exist")
-				}
+				log.Println("[diag]: ", id, "is deleted because not exist")
 			}
-		case <-time.After(1 * time.Second):
-			log.Println("[diag]: ", s.Client[reqId] )
+			if s.Client[reqId].Ip == "" {
+				delete(s.Client, reqId)
+				log.Println("[diag]: ", reqId, "is deleted because not exist")
+			}
 		}
-	}()
+	case <-time.After(1 * time.Second):
+		log.Println("[diag]: ", s.Client[reqId])
+	}
 }

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/rightly/whoami-go/util"
+	//"github.com/rightly/whoami-go/util"
 	"github.com/miekg/dns"
 	"fmt"
 	"net"
@@ -11,12 +11,14 @@ import (
 	"net/http"
 	"time"
 	"log"
+	"sync"
+	"whoami/util"
 )
 
 // DNS, Web Server Port
 const (
-	webPort="80"
-	dnsPort="53"
+	webPort="8080"
+	dnsPort="8053"
 )
 
 var random = util.New()
@@ -38,8 +40,9 @@ type (
 
 	// Web, DNS Server
 	Server struct {
-		Api *Http
-		Dns *dns.Server
+		mu     *sync.Mutex
+		Api    *Http
+		Dns    *dns.Server
 		Client map[string]*Info
 		// Job queue
 		RequestId chan string
@@ -50,6 +53,7 @@ func New() *Server {
 	queueCount := 1
 
 	return &Server{
+		mu: new(sync.Mutex),
 		Api: NewHttpServer(),
 		// DNS 메시지 길이는 512byte 가 넘지 않고 Zone Transfer 요청도 없음으로 udp 만
 		Dns:       &dns.Server{Addr: "[::]:"+dnsPort, Net: "udp4", TsigSecret: nil},
