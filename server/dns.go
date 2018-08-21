@@ -32,7 +32,6 @@ func whoami(w dns.ResponseWriter, r *dns.Msg) {
 	// Query 응답
 	// Client Cache DNS IP에 대해 TTL 0
 	// 단순 A, TXT 레코드 질의만 처리하기 때문에, Secure 또는 기타 옵션에 대한 예외처리 안함
-
 	// IPv4 or IPv6
 	if v4 {
 		rr = &dns.A{
@@ -52,9 +51,8 @@ func whoami(w dns.ResponseWriter, r *dns.Msg) {
 	}
 
 	// TXT or A (AAAA)
-	// TXT 레코드 질의일때는 Answer Section 에 Request ID 를
-	// A (AAAA) 레코드 일즤일때는 Answer Section 에 Client Local cache server ip 를
-	// 나버민 Additional Section 에 담아 응답
+	// A (AAAA) 레코드 질의시 Answer Section 에 Client Local cache server ip 를
+	// Port 정보를 Additional Section 에 담아 응답
 	switch r.Question[0].Qtype {
 	case dns.TypeTXT:
 		m.Answer = append(m.Answer, t)
@@ -107,15 +105,14 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 	fmt.Fprintln(os.Stdout, m.String())
 }
 
-func (s *Server) throw(ldns *net.IP)  {
-	go func() {
-		// Random request id 생성
-		reqId := random.String(32)
-		// request id 에 local cache dns ip 추가
-		s.Client[reqId] = &Info{
-			Dns:*ldns,
-		}
-		// request id 전달
-		s.RequestId <- reqId
-	}()
+func (s *Server) throw(ldns *net.IP) {
+
+	// Random request id 생성
+	reqId := random.String(32)
+	// request id 에 local cache dns ip 추가
+	s.Client[reqId] = &Info{
+		Dns: *ldns,
+	}
+	// request id 전달
+	s.RequestId <- reqId
 }

@@ -11,21 +11,30 @@ import (
 	"net/http"
 )
 
+// DNS, Web Server Port
+const (
+	webPort="8080"
+	dnsPort="8053"
+)
+
 var random = util.New()
 
 type (
+	// Diagnosis 정보
 	Info struct {
-		Dns         net.IP `json:"clientDns"`
-		Ip          string `json:"clientIp"`
-		UserAgent   string `json:"userAgent"`
-		RequestTime string `json:"requestTime"`
+		Dns          net.IP `json:"clientDns"`
+		Ip           string `json:"clientIp"`
+		UserAgent    string `json:"userAgent"`
+		ResponseTime string `json:"responseTime"`
+		ReceiveTime  string `json:"receiveTime"`
 	}
-
+	// Web Server
 	Http struct {
 		Server *http.Server
 		Mux  *http.ServeMux
 	}
 
+	// Web, DNS Server
 	Server struct {
 		Api *Http
 		Dns *dns.Server
@@ -43,7 +52,7 @@ func New() *Server {
 	return &Server{
 		Api: NewHttpServer(),
 		// DNS 메시지 길이는 512byte 가 넘지 않고 Zone Transfer 요청도 없음으로 udp 만
-		Dns:       &dns.Server{Addr: "[::]:53", Net: "udp4", TsigSecret: nil},
+		Dns:       &dns.Server{Addr: "[::]:"+dnsPort, Net: "udp4", TsigSecret: nil},
 		Client:    make(map[string]*Info, 0),
 		RequestId: make(chan string, queueCount),
 	}
