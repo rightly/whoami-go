@@ -122,8 +122,6 @@ func queryString(req *http.Request, key string) string {
 	return q[0]
 }
 
-
-
 func BasicAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)

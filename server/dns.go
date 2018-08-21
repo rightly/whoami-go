@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"log"
+	"time"
 )
 
 // DNS Server Handle Functions
@@ -100,7 +101,7 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 
 	w.WriteMsg(m)
 	log.Println("[diag]:", m.Question[0].Name, "-> ", m.Answer)
-	s.throw(&a)
+	go s.throw(&a)
 }
 
 func (s *Server) throw(ldns *net.IP) {
@@ -113,4 +114,17 @@ func (s *Server) throw(ldns *net.IP) {
 	}
 	// request id 전달
 	s.RequestId <- reqId
+	// 1초 후에도 채널에 값이 있는지 확인
+	time.Sleep(1 * time.Second)
+	select {
+	case id := <-s.RequestId:
+		if id == reqId {
+			log.Println("[diag]: ", id, "is not received")
+			return
+		} else {
+			log.Println("[diag]: error! ", id, " and ", reqId, " is not equal")
+		}
+	case <-time.After(1 * time.Second):
+		log.Println("[diag]: ", s.Client[reqId] )
+	}
 }
