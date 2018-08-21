@@ -125,11 +125,11 @@ func (s *Server) throw(ldns *net.IP) {
 			return
 		} else {
 			log.Println("[diag]: error! ", id, " and ", reqId, " is not equal")
-			if s.Client[id].Ip == "" {
+			if s.Client[id].Ip == "" && s.Client[id] != nil{
 				delete(s.Client, id)
 				log.Println("[diag]: ", id, "is deleted because not exist")
 			}
-			if s.Client[reqId].Ip == "" {
+			if s.Client[reqId].Ip == "" && s.Client[reqId] != nil {
 				delete(s.Client, reqId)
 				log.Println("[diag]: ", reqId, "is deleted because not exist")
 			}
