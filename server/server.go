@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 	"net/http"
+	"time"
+	"log"
 )
 
 // DNS, Web Server Port
@@ -79,6 +81,10 @@ func (s *Server) Start() {
 		}
 	}()
 
+	go func() {
+		s.garbageCollector()
+	}()
+
 	fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
 
 
@@ -87,4 +93,17 @@ func (s *Server) Start() {
 	catch := <-sig
 
 	fmt.Printf("Signal (%s) received, stopping\n", catch)
+}
+
+// 60초마다 비어있는 requestid 를 제거
+func (s *Server)garbageCollector() {
+	for {
+		for id, info := range s.Client {
+			if info.Ip == "" {
+				delete(s.Client, id)
+				log.Println("[gc]: delete ", id)
+			}
+		}
+		time.Sleep(60 * time.Second)
+	}
 }

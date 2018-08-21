@@ -64,7 +64,7 @@ func whoami(w dns.ResponseWriter, r *dns.Msg) {
 		m.Extra = append(m.Extra, t)
 	}
 
-	log.Println(m.Question[0].Name, m.Answer)
+	log.Println("[whoami]:", m.Question[0].Name, "-> ", m.Answer)
 	w.WriteMsg(m)
 }
 
@@ -99,7 +99,7 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 	}
 
 	w.WriteMsg(m)
-	log.Println(m.Question[0].Name, m.Answer)
+	log.Println("[diag]:", m.Question[0].Name, "-> ", m.Answer)
 	s.throw(&a)
 }
 
