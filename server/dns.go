@@ -119,6 +119,7 @@ func (s *Server) throw(ldns *net.IP) {
 	select {
 	case id := <-s.RequestId:
 		if id == reqId {
+			delete(s.Client, id)
 			log.Println("[diag]: ", id, "is not received")
 			return
 		} else {

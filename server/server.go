@@ -82,7 +82,7 @@ func (s *Server) Start() {
 	}()
 
 	go func() {
-		s.garbageCollector()
+		s.garbageCollector(60 * time.Second)
 	}()
 
 	fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
@@ -96,7 +96,7 @@ func (s *Server) Start() {
 }
 
 // 60초마다 비어있는 requestid 를 제거
-func (s *Server)garbageCollector() {
+func (s *Server)garbageCollector(t time.Duration) {
 	for {
 		for id, info := range s.Client {
 			if info.Ip == "" {
@@ -104,6 +104,6 @@ func (s *Server)garbageCollector() {
 				log.Println("[gc]: delete ", id)
 			}
 		}
-		time.Sleep(60 * time.Second)
+		time.Sleep(t)
 	}
 }
