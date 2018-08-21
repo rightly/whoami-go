@@ -101,7 +101,7 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 
 	w.WriteMsg(m)
 	log.Println("[diag]:", m.Question[0].Name, "-> ", m.Answer)
-	go s.throw(&a)
+	s.throw(&a)
 }
 
 func (s *Server) throw(ldns *net.IP) {
@@ -114,24 +114,28 @@ func (s *Server) throw(ldns *net.IP) {
 	}
 	// request id 전달
 	s.RequestId <- reqId
-	// 1초 후에도 채널에 값이 있는지 확인
-	time.Sleep(2 * time.Second)
-	select {
-	case id := <-s.RequestId:
-		if id == reqId {
-			delete(s.Client, id)
-			log.Println("[diag]: ", id, "is not received")
-			return
-		} else {
-			log.Println("[diag]: error! ", id, " and ", reqId, " is not equal")
-			if s.Client[id].Ip == "" {
+	// 2초 후에도 채널에 값이 있는지 확인
+	go func() {
+		time.Sleep(2 * time.Second)
+		select {
+		case id := <-s.RequestId:
+			if id == reqId {
 				delete(s.Client, id)
+				log.Println("[diag]: ", id, "is deleted because not received")
+				return
+			} else {
+				log.Println("[diag]: error! ", id, " and ", reqId, " is not equal")
+				if s.Client[id].Ip == "" {
+					delete(s.Client, id)
+					log.Println("[diag]: ", id, "is deleted because not exist")
+				}
+				if s.Client[reqId].Ip == "" {
+					delete(s.Client, reqId)
+					log.Println("[diag]: ", reqId, "is deleted because not exist")
+				}
 			}
-			if s.Client[reqId].Ip == "" {
-				delete(s.Client, reqId)
-			}
+		case <-time.After(1 * time.Second):
+			log.Println("[diag]: ", s.Client[reqId] )
 		}
-	case <-time.After(1 * time.Second):
-		log.Println("[diag]: ", s.Client[reqId] )
-	}
+	}()
 }
