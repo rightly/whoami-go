@@ -105,7 +105,7 @@ func (s *Server)garbageCollector(t time.Duration) {
 	for {
 		s.mu.Lock()
 		for id, info := range s.Client {
-			if info.Ip == "" {
+			if info.Ip == "" && info != nil {
 				delete(s.Client, id)
 				log.Println("[gc]: delete ", id)
 			}

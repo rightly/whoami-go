@@ -112,7 +112,9 @@ func (s *Server) delete()  {
 	s.mu.Lock()
 	select {
 	case reqId = <- s.RequestId:
-		delete(s.Client, reqId)
+		if s.Client[reqId] != nil {
+			delete(s.Client, reqId)
+		}
 	case <-timeout:
 		// timeout 인 경우 현재 request id 채널이 비어있다고 간주함
 	}
