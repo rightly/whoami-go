@@ -143,7 +143,7 @@ func BasicAuth(next http.HandlerFunc) http.HandlerFunc {
 
 func Logger(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println(w.Header())
+		log.Printf("[api]: %v %v %v", r.RequestURI, r.UserAgent(), w.Header())
 		next.ServeHTTP(w, r)
 	}
 }
