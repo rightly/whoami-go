@@ -64,11 +64,10 @@ func (v *Info) String() string {
 }
 
 func (s *Server) Start() {
-	var err error
 	// DNS Server
 	go func() {
 		s.DnsHandler()
-		err = s.Dns.ListenAndServe()
+		err := s.Dns.ListenAndServe()
 		if err != nil {
 			fmt.Printf("Failed to setup the dns server: %s\n", err.Error())
 		}
@@ -81,9 +80,9 @@ func (s *Server) Start() {
 			fmt.Printf("Failed to setup the web server: %s\n", err.Error())
 		}
 	}()
-	if err != nil {
-		fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
-	}
+
+	fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
+
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)

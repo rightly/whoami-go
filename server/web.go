@@ -118,5 +118,6 @@ func queryString(req *http.Request, key string) string {
 	if !ok || len(q[0]) < 1 {
 		return ""
 	}
+	fmt.Println(q)
 	return q[0]
 }
