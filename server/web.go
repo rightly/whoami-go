@@ -6,7 +6,7 @@ import (
 	"time"
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/gommon/log"
+	"log"
 )
 
 func NewHttpServer() *Http {
@@ -49,7 +49,6 @@ func (s *Server) webDiag(res http.ResponseWriter, req *http.Request) {
 		"requestId": reqId,
 		"info":      s.Client[reqId],
 	})
-	log.Info(res.Header(), info)
 	res.Write(info)
 	return
 }
@@ -146,7 +145,7 @@ func BasicAuth(next http.HandlerFunc) http.HandlerFunc {
 
 func Logger(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Info(w)
+		log.Println(w)
 		next.ServeHTTP(w, r)
 	}
 }
