@@ -102,12 +102,14 @@ func (s *Server) Start() {
 // 60초마다 비어있는 requestid 를 제거
 func (s *Server)garbageCollector(t time.Duration) {
 	for {
+		s.mu.Lock()
 		for id, info := range s.Client {
 			if info.Ip == "" {
 				delete(s.Client, id)
 				log.Println("[gc]: delete ", id)
 			}
 		}
+		s.mu.Unlock()
 		time.Sleep(t)
 	}
 }
