@@ -17,8 +17,8 @@ import (
 
 // DNS, Web Server Port
 const (
-	webPort="8080"
-	dnsPort="8053"
+	webPort="80"
+	dnsPort="53"
 )
 
 var random = util.New()
