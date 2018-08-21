@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/miekg/dns"
 	"fmt"
-	"os"
 	"net"
+	"log"
 )
 
 // DNS Server Handle Functions
@@ -64,7 +64,8 @@ func whoami(w dns.ResponseWriter, r *dns.Msg) {
 		m.Extra = append(m.Extra, t)
 	}
 
-	fmt.Fprintln(os.Stdout, m.String())
+	log.Println(m.Question[0].Name, m.Answer)
+	w.WriteMsg(m)
 }
 
 // dnsDiag 는 diag web server ip 를 리턴해주며 requestId 를 생성해
@@ -98,7 +99,7 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 	}
 
 	w.WriteMsg(m)
-
+	log.Println(m.Question[0].Name, m.Answer)
 	s.throw(&a)
 }
 

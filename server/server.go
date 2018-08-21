@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 	"net/http"
-	"github.com/labstack/gommon/log"
 )
 
 // DNS, Web Server Port
