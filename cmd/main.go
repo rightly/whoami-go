@@ -1,7 +1,6 @@
 package main
 
-//import "github.com/rightly/whoami-go/server"
-import "whoami/server"
+import "github.com/rightly/whoami-go/server"
 
 
 

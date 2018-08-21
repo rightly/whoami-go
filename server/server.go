@@ -1,7 +1,7 @@
 package server
 
 import (
-	//"github.com/rightly/whoami-go/util"
+	"github.com/rightly/whoami-go/util"
 	"github.com/miekg/dns"
 	"fmt"
 	"net"
@@ -12,7 +12,6 @@ import (
 	"time"
 	"log"
 	"sync"
-	"whoami/util"
 )
 
 // DNS, Web Server Port
