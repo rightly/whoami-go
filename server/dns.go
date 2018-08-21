@@ -65,8 +65,6 @@ func whoami(w dns.ResponseWriter, r *dns.Msg) {
 	}
 
 	fmt.Fprintln(os.Stdout, m.String())
-
-	w.WriteMsg(m)
 }
 
 // dnsDiag 는 diag web server ip 를 리턴해주며 requestId 를 생성해
@@ -102,7 +100,6 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 	w.WriteMsg(m)
 
 	s.throw(&a)
-	fmt.Fprintln(os.Stdout, m.String())
 }
 
 func (s *Server) throw(ldns *net.IP) {

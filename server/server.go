@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"net/http"
+	"github.com/labstack/gommon/log"
 )
 
 // DNS, Web Server Port
@@ -87,23 +88,4 @@ func (s *Server) Start() {
 	catch := <-sig
 
 	fmt.Printf("Signal (%s) received, stopping\n", catch)
-}
-
-func BasicAuth(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-
-		username, password, authOK := r.BasicAuth()
-		if authOK == false {
-			http.Error(w, "Not authorized", 401)
-			return
-		}
-
-		if username != "username" || password != "password" {
-			http.Error(w, "Not authorized", 401)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	}
 }

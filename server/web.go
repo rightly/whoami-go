@@ -6,6 +6,7 @@ import (
 	"time"
 	"encoding/json"
 	"fmt"
+	"github.com/labstack/gommon/log"
 )
 
 func NewHttpServer() *Http {
@@ -21,8 +22,8 @@ func NewHttpServer() *Http {
 func (s *Server) ListenAndServe() error {
 	// Set Handlers
 	mux := s.Api.Mux
-	mux.HandleFunc("/collect", s.webDiag)
-	mux.HandleFunc("/show", BasicAuth(s.show))
+	mux.HandleFunc("/collect", Logger(s.webDiag))
+	mux.HandleFunc("/show", BasicAuth(Logger(s.show)))
 	s.Api.Server.Handler = mux
 
 	err := s.Api.Server.ListenAndServe()
@@ -38,7 +39,7 @@ func (s *Server) webDiag(res http.ResponseWriter, req *http.Request) {
 	// timeout 일때 -> dns caching 으로 인해 룩업하지 않은 경우
 	if reqId == "" {
 		res.WriteHeader(http.StatusOK)
-		body := "Your browser already resolve and caching this domain"
+		body := "Your browser is already resolving and caching this domain"
 		res.Write([]byte(body))
 		return
 	}
@@ -48,7 +49,7 @@ func (s *Server) webDiag(res http.ResponseWriter, req *http.Request) {
 		"requestId": reqId,
 		"info":      s.Client[reqId],
 	})
-	fmt.Println(string(info))
+	log.Info(res.Header(), info)
 	res.Write(info)
 	return
 }
@@ -120,4 +121,32 @@ func queryString(req *http.Request, key string) string {
 	}
 	fmt.Println(q)
 	return q[0]
+}
+
+
+
+func BasicAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+
+		username, password, authOK := r.BasicAuth()
+		if authOK == false {
+			http.Error(w, "Not authorized", 401)
+			return
+		}
+
+		if username != "username" || password != "password" {
+			http.Error(w, "Not authorized", 401)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}
+}
+
+func Logger(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Info(w)
+		next.ServeHTTP(w, r)
+	}
 }
