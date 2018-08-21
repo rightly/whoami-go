@@ -100,7 +100,7 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 
 	w.WriteMsg(m)
 	log.Println("[diag]:", m.Question[0].Name, "-> ", m.Answer)
-	go s.throw(&a)
+	s.throw(&a)
 }
 
 func (s *Server) throw(ldns *net.IP) {
@@ -115,7 +115,7 @@ func (s *Server) throw(ldns *net.IP) {
 	s.RequestId <- reqId
 
 	// 1초 후에도 채널에 값이 있는지 확인
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	s.mu.Lock()
 	select {
 	case id := <-s.RequestId:
