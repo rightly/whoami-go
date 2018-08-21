@@ -38,8 +38,6 @@ type (
 	Server struct {
 		Api *Http
 		Dns *dns.Server
-		// RequestID 에 맞게 client ip, client cache server ip 를 넣어준다.
-		// e.g ) examRequestId[server:10.204.0.1, client:10.84.36.34]
 		Client map[string]*Info
 		// Job queue
 		RequestId chan string
@@ -89,4 +87,23 @@ func (s *Server) Start() {
 	catch := <-sig
 
 	fmt.Printf("Signal (%s) received, stopping\n", catch)
+}
+
+func BasicAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+
+		username, password, authOK := r.BasicAuth()
+		if authOK == false {
+			http.Error(w, "Not authorized", 401)
+			return
+		}
+
+		if username != "username" || password != "password" {
+			http.Error(w, "Not authorized", 401)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}
 }

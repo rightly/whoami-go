@@ -22,7 +22,7 @@ func (s *Server) ListenAndServe() error {
 	// Set Handlers
 	mux := s.Api.Mux
 	mux.HandleFunc("/collect", s.webDiag)
-	mux.HandleFunc("/show", s.show)
+	mux.HandleFunc("/show", BasicAuth(s.show))
 	s.Api.Server.Handler = mux
 
 	err := s.Api.Server.ListenAndServe()
@@ -38,7 +38,7 @@ func (s *Server) webDiag(res http.ResponseWriter, req *http.Request) {
 	// timeout 일때 -> dns caching 으로 인해 룩업하지 않은 경우
 	if reqId == "" {
 		res.WriteHeader(http.StatusOK)
-		body := "Your browser already caching dns"
+		body := "Your browser already resolve and caching this domain"
 		res.Write([]byte(body))
 		return
 	}
