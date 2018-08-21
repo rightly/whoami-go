@@ -12,6 +12,7 @@ import (
 	"time"
 	"log"
 	"sync"
+	"encoding/json"
 )
 
 // DNS, Web Server Port
@@ -62,7 +63,8 @@ func New() *Server {
 }
 
 func (v *Info) String() string {
-	str := fmt.Sprintf("ip=%v,ua=%v,dns=%v", v.Ip, v.UserAgent, v.Dns)
+	bytes, _ := json.Marshal(v)
+	str := string(bytes)
 	return str
 }
 
