@@ -134,7 +134,7 @@ func (s *Server) throw(ldns *net.IP) {
 				log.Println("[diag]: ", reqId, "is deleted because not exist")
 			}
 		}
-	case <-time.After(1 * time.Second):
-		log.Println("[diag]: ", s.Client[reqId])
+	case <-time.After(100 * time.Nanosecond):
+		log.Println("[diag]: ", reqId, "->", s.Client[reqId])
 	}
 }
