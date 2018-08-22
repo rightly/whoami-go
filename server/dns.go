@@ -122,10 +122,10 @@ func (s *Server) throw(ldns *net.IP) {
 		select {
 		case id := <-s.RequestId:
 			delete(s.Client, id)
-			log.Println("[diag]: ", id, "is deleted because not received")
+			log.Println("[diag#delete]: ", id, "is deleted because not received")
 			return
 		case <-time.After(100 * time.Millisecond):
-			log.Println("[diag]: ", reqId, "->", s.Client[reqId])
+			log.Println("[diag#success]: ", reqId, "->", s.Client[reqId])
 			return
 		default:
 			return
