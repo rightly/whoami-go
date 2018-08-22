@@ -70,9 +70,10 @@ func (v *Info) String() string {
 
 func (s *Server) Start() {
 	// DNS Server
+	var err error
 	go func() {
 		s.DnsHandler()
-		err := s.Dns.ListenAndServe()
+		err = s.Dns.ListenAndServe()
 		if err != nil {
 			fmt.Printf("Failed to setup the dns server: %s\n", err.Error())
 		}
@@ -80,7 +81,7 @@ func (s *Server) Start() {
 
 	// API Server
 	go func() {
-		err := s.ListenAndServe()
+		err = s.ListenAndServe()
 		if err != nil {
 			fmt.Printf("Failed to setup the web server: %s\n", err.Error())
 		}
@@ -90,8 +91,9 @@ func (s *Server) Start() {
 		s.garbageCollector(60 * time.Second)
 	}()
 
-	fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
-
+	if err != nil {
+		fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
+	}
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
