@@ -100,12 +100,10 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 
 	w.WriteMsg(m)
 	log.Println("[diag]:", m.Question[0].Name, "-> ", m.Answer)
-	go s.throw(&a)
+	s.throw(&a)
 }
 
 func (s *Server) throw(ldns *net.IP) {
-	defer s.mu.Unlock()
-
 	// Random request id 생성
 	reqId := random.String(32)
 	// request id 에 local cache dns ip 추가
@@ -117,15 +115,23 @@ func (s *Server) throw(ldns *net.IP) {
 
 	// 1초 후에도 채널에 값이 있는지 확인
 	time.Sleep(2000 * time.Nanosecond)
-	s.mu.Lock()
-	select {
-	case id := <-s.RequestId:
-		if id == reqId {
-			delete(s.Client, id)
-			log.Println("[diag]: ", id, "is deleted because not received")
+	go func() {
+		s.mu.Lock()
+		select {
+		case id := <-s.RequestId:
+			if id == reqId {
+				delete(s.Client, id)
+				log.Println("[diag]: ", id, "is deleted because not received")
+				s.mu.Unlock()
+				return
+			}
+		case <-time.After(100 * time.Nanosecond):
+			log.Println("[diag]: ", reqId, "->", s.Client[reqId])
+			s.mu.Unlock()
+			return
+		default:
+			s.mu.Unlock()
 			return
 		}
-	case <-time.After(100 * time.Nanosecond):
-		log.Println("[diag]: ", reqId, "->", s.Client[reqId])
-	}
+	}()
 }
