@@ -117,21 +117,19 @@ func (s *Server) throw(ldns *net.IP) {
 	// 1초 후에도 채널에 값이 있는지 확인
 	time.Sleep(500 * time.Millisecond)
 	go func() {
+		defer s.mu.Unlock()
 		s.mu.Lock()
 		select {
 		case id := <-s.RequestId:
 			if id == reqId {
 				delete(s.Client, id)
 				log.Println("[diag]: ", id, "is deleted because not received")
-				s.mu.Unlock()
 				return
 			}
 		case <-time.After(100 * time.Millisecond):
 			log.Println("[diag]: ", reqId, "->", s.Client[reqId])
-			s.mu.Unlock()
 			return
 		default:
-			s.mu.Unlock()
 			return
 		}
 	}()
