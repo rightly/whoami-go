@@ -116,7 +116,7 @@ func (s *Server) throw(ldns *net.IP) {
 	s.RequestId <- reqId
 
 	// 1초 후에도 채널에 값이 있는지 확인
-	time.Sleep(1000 * time.Nanosecond)
+	time.Sleep(2000 * time.Nanosecond)
 	s.mu.Lock()
 	select {
 	case id := <-s.RequestId:
