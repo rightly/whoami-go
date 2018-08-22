@@ -91,9 +91,8 @@ func (s *Server) Start() {
 		s.garbageCollector(60 * time.Second)
 	}()
 
-	if err != nil {
-		fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
-	}
+	fmt.Println("server started: ", "web(", s.Api.Server.Addr, "), dns(", s.Dns.Addr, ")")
+
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
