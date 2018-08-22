@@ -105,6 +105,8 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 
 func (s *Server) throw(ldns *net.IP) {
 	defer s.mu.Unlock()
+
+	s.mu.Lock()
 	// Random request id 생성
 	reqId := random.String(32)
 	// request id 에 local cache dns ip 추가
@@ -115,8 +117,7 @@ func (s *Server) throw(ldns *net.IP) {
 	s.RequestId <- reqId
 
 	// 1초 후에도 채널에 값이 있는지 확인
-	time.Sleep(1 * time.Second)
-	s.mu.Lock()
+	time.Sleep(900 * time.Nanosecond)
 	select {
 	case id := <-s.RequestId:
 		if id == reqId {
