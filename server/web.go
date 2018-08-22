@@ -88,7 +88,7 @@ func (s *Server)show(res http.ResponseWriter, req *http.Request) {
 func (s *Server) receive(ip, ua string) string {
 	defer s.mu.Unlock()
 
-	timeout := time.After(500 * time.Nanosecond)
+	timeout := time.After(500 * time.Millisecond)
 	s.mu.Lock()
 	select {
 	case reqId := <-s.RequestId:
@@ -105,7 +105,7 @@ func (s *Server) receive(ip, ua string) string {
 
 func (s *Server) delete()  {
 	defer s.mu.Unlock()
-	timeout := time.After(500 * time.Nanosecond)
+	timeout := time.After(500 * time.Millisecond)
 
 	s.mu.Lock()
 	select {

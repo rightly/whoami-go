@@ -112,9 +112,10 @@ func (s *Server) throw(ldns *net.IP) {
 	}
 	// request id 전달
 	s.RequestId <- reqId
+	log.Println("[diag#throw]:", reqId)
 
 	// 1초 후에도 채널에 값이 있는지 확인
-	time.Sleep(2000 * time.Nanosecond)
+	time.Sleep(500 * time.Millisecond)
 	go func() {
 		s.mu.Lock()
 		select {
@@ -125,7 +126,7 @@ func (s *Server) throw(ldns *net.IP) {
 				s.mu.Unlock()
 				return
 			}
-		case <-time.After(100 * time.Nanosecond):
+		case <-time.After(100 * time.Millisecond):
 			log.Println("[diag]: ", reqId, "->", s.Client[reqId])
 			s.mu.Unlock()
 			return
