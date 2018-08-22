@@ -106,7 +106,6 @@ func (s *Server) dnsDiag(w dns.ResponseWriter, r *dns.Msg)  {
 func (s *Server) throw(ldns *net.IP) {
 	defer s.mu.Unlock()
 
-	s.mu.Lock()
 	// Random request id 생성
 	reqId := random.String(32)
 	// request id 에 local cache dns ip 추가
@@ -118,22 +117,13 @@ func (s *Server) throw(ldns *net.IP) {
 
 	// 1초 후에도 채널에 값이 있는지 확인
 	time.Sleep(900 * time.Nanosecond)
+	s.mu.Lock()
 	select {
 	case id := <-s.RequestId:
 		if id == reqId {
 			delete(s.Client, id)
 			log.Println("[diag]: ", id, "is deleted because not received")
 			return
-		} else {
-			log.Println("[diag]: error! ", id, " and ", reqId, " is not equal")
-			if s.Client[id].Ip == "" && s.Client[id] != nil{
-				delete(s.Client, id)
-				log.Println("[diag]: ", id, "is deleted because not exist")
-			}
-			if s.Client[reqId].Ip == "" && s.Client[reqId] != nil {
-				delete(s.Client, reqId)
-				log.Println("[diag]: ", reqId, "is deleted because not exist")
-			}
 		}
 	case <-time.After(100 * time.Nanosecond):
 		log.Println("[diag]: ", reqId, "->", s.Client[reqId])
