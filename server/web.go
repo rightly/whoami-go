@@ -89,9 +89,9 @@ func (s *Server) receive(ip, ua string) string {
 	defer s.mu.Unlock()
 
 	timeout := time.After(500 * time.Nanosecond)
+	s.mu.Lock()
 	select {
 	case reqId := <-s.RequestId:
-		s.mu.Lock()
 		reqtime := time.Now().Format("2006-01-02 15:04:05 MST")
 		s.Client[reqId].UserAgent = ua
 		s.Client[reqId].Ip = ip
@@ -107,9 +107,9 @@ func (s *Server) delete()  {
 	defer s.mu.Unlock()
 	timeout := time.After(500 * time.Nanosecond)
 
+	s.mu.Lock()
 	select {
 	case reqId := <- s.RequestId:
-		s.mu.Lock()
 		if s.Client[reqId] != nil {
 			delete(s.Client, reqId)
 		}
