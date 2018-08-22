@@ -121,11 +121,9 @@ func (s *Server) throw(ldns *net.IP) {
 		s.mu.Lock()
 		select {
 		case id := <-s.RequestId:
-			if id == reqId {
-				delete(s.Client, id)
-				log.Println("[diag]: ", id, "is deleted because not received")
-				return
-			}
+			delete(s.Client, id)
+			log.Println("[diag]: ", id, "is deleted because not received")
+			return
 		case <-time.After(100 * time.Millisecond):
 			log.Println("[diag]: ", reqId, "->", s.Client[reqId])
 			return
